@@ -31,6 +31,11 @@ class Capsule(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# Home page: pagina iniziale con informazioni sul sito
+@app.route('/')
+def home():
+    return render_template('home.html')
+
 # Route di registrazione
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -109,7 +114,6 @@ def view_capsule(capsule_id):
         return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
-    # Creare il database (solo la prima volta)
     with app.app_context():
         db.create_all()
     app.run(debug=True)

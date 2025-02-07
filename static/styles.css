@@ -1,0 +1,101 @@
+/* Stili generali */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f4f8;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+/* Navbar */
+nav {
+    background-color: #007BFF;
+    color: #fff;
+    padding: 10px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.nav-logo {
+    font-size: 1.5em;
+    font-weight: bold;
+    text-decoration: none;
+    color: #fff;
+}
+
+.nav-links a {
+    color: #fff;
+    margin-left: 15px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+/* Container principale */
+.container {
+    max-width: 800px;
+    margin: 30px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* Pulsanti */
+.btn {
+    display: inline-block;
+    background-color: #007BFF;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+/* Home page */
+.home-container {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 15px 0;
+    background-color: #007BFF;
+    color: #fff;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Messaggi Flash */
+.flashes {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.flashes li {
+    background-color: #ffcccc;
+    border: 1px solid #ff8888;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}

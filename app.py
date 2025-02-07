@@ -3,10 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'la_tua_chiave_segreta'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///time_capsule.db'
+UPLOAD_FOLDER = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 db = SQLAlchemy(app)
 
 login_manager = LoginManager()
@@ -26,6 +30,7 @@ class Capsule(db.Model):
     content = db.Column(db.Text, nullable=False)
     release_date = db.Column(db.DateTime, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    photo_path = db.Column(db.String(300), nullable=True)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -87,14 +92,24 @@ def new_capsule():
     if request.method == 'POST':
         content = request.form.get('content')
         release_date_str = request.form.get('release_date')  # Formato atteso: YYYY-MM-DD
+        photo = request.files.get('photo')
         try:
-            release_date = datetime.strptime(release_date_str, '%Y-%m-%d')
+            release_date = datetime.strptime(release_date_str, '%d-%m-%Y')
         except ValueError:
-            flash('Formato data non valido. Usa YYYY-MM-DD.')
+            flash("Formato data non valido, usa DD-MM-YYYY")
             return redirect(url_for('new_capsule'))
-        new_capsule = Capsule(user_id=current_user.id, content=content, release_date=release_date)
+
+        photo_path = None
+        if photo and photo.filename != '':
+            filename = secure_filename(photo.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            photo.save(file_path)
+            photo_path = file_path
+
+        new_capsule = Capsule(user_id=current_user.id, content=content, release_date=release_date, photo_path=photo_path)
         db.session.add(new_capsule)
         db.session.commit()
+        flash("Capsula creata con successo!")
         return redirect(url_for('dashboard'))
     return render_template('new_capsule.html')
 

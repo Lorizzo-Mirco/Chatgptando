@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Visualizza Capsule</h2>
+<p><strong>Contenuto:</strong> {{ capsule.content }}</p>
+<p><strong>Data di rilascio:</strong> {{ capsule.release_date.strftime('%d-%m-%Y') }}</p>
+{% if capsule.photo_path %}
+    <p><strong>Foto:</strong></p>
+    <img src="{{ url_for('static', filename=capsule.photo_path|replace('static/', '')) }}" alt="Foto Capsule" style="max-width:300px;">
+{% endif %}
+{% if capsule.video_path %}
+    <p><strong>Video:</strong></p>
+    <video controls style="max-width:300px;">
+      <source src="{{ url_for('static', filename=capsule.video_path|replace('static/', '')) }}" type="video/mp4">
+      Il tuo browser non supporta la riproduzione video.
+    </video>
+{% endif %}
+{% if capsule.link %}
+    <p><strong>Link esterno:</strong> <a href="{{ capsule.link }}" target="_blank">{{ capsule.link }}</a></p>
+{% endif %}
+{% endblock %}

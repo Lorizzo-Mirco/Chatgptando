@@ -2,12 +2,21 @@
 {% block content %}
 <h2>Crea una nuova Capsule del Tempo</h2>
 <form method="POST" enctype="multipart/form-data">
-    <label>Contenuto:</label><br>
-    <textarea name="content" rows="5" cols="40" required></textarea><br>
+    <label>Contenuto (testo):</label><br>
+    <textarea name="content" rows="5" cols="40"></textarea><br>
+
     <label>Data di rilascio (DD-MM-YYYY):</label>
     <input type="text" name="release_date" placeholder="gg-mm-aaaa" required><br>
-    <label>Carica una foto:</label><br>
-    <input type="file" name="photo" accept="image/*"><br><br>
+
+    <label>Carica una foto (opzionale):</label><br>
+    <input type="file" name="photo" accept="image/*"><br>
+
+    <label>Carica un video (opzionale):</label><br>
+    <input type="file" name="video" accept="video/*"><br>
+
+    <label>Oppure incolla un link (opzionale):</label><br>
+    <input type="text" name="link" placeholder="Incolla un link"><br><br>
+
     <button type="submit">Crea Capsule</button>
 </form>
 {% endblock %}

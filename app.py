@@ -10,6 +10,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'la_tua_chiave_segreta'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///time_capsule.db'
 UPLOAD_FOLDER = 'static/uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 db = SQLAlchemy(app)
 
@@ -31,6 +33,8 @@ class Capsule(db.Model):
     release_date = db.Column(db.DateTime, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     photo_path = db.Column(db.String(300), nullable=True)
+    video_path = db.Column(db.String(300), nullable=True)
+    link = db.Column(db.String(300), nullable=True)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -92,21 +96,30 @@ def new_capsule():
     if request.method == 'POST':
         content = request.form.get('content')
         release_date_str = request.form.get('release_date')  # Formato atteso: YYYY-MM-DD
+        link = request.form.get('link')
         photo = request.files.get('photo')
+        video = request.files.get('video')
+
         try:
             release_date = datetime.strptime(release_date_str, '%d-%m-%Y')
         except ValueError:
             flash("Formato data non valido, usa DD-MM-YYYY")
             return redirect(url_for('new_capsule'))
 
-        photo_path = None
-        if photo and photo.filename != '':
-            filename = secure_filename(photo.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            photo.save(file_path)
-            photo_path = file_path
+        photo_path, video_path = None, None
 
-        new_capsule = Capsule(user_id=current_user.id, content=content, release_date=release_date, photo_path=photo_path)
+        if photo and photo.filename:
+            filename = secure_filename(photo.filename)
+            path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            photo.save(path)
+            photo_path = path
+
+        if video and video.filename:
+            video_filename = secure_filename(video.filename)
+            video_path = os.path.join(app.config['UPLOAD_FOLDER'], video_filename)
+            video.save(video_path)
+
+        new_capsule = Capsule(user_id=current_user.id, content=content, release_date=release_date, photo_path=photo_path, video_path=video_path, link=link)
         db.session.add(new_capsule)
         db.session.commit()
         flash("Capsula creata con successo!")
@@ -127,6 +140,11 @@ def view_capsule(capsule_id):
     else:
         flash(f"La capsule sarà disponibile il {capsule.release_date.strftime('%Y-%m-%d')}.")
         return redirect(url_for('dashboard'))
+
+@app.route('/view_capsule/<int:capsule_id>', endpoint='view_capsule_endpoint')
+def view_capsule_by_id(capsule_id):
+    capsule = Capsule.query.get_or_404(capsule_id)
+    return render_template('view_capsule.html', capsule=capsule)
 
 if __name__ == '__main__':
     with app.app_context():

@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'la_tua_chiave_segreta'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///time_capsule.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///capsules.db'
 UPLOAD_FOLDER = 'static/uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -35,6 +35,34 @@ class Capsule(db.Model):
     photo_path = db.Column(db.String(300), nullable=True)
     video_path = db.Column(db.String(300), nullable=True)
     link = db.Column(db.String(300), nullable=True)
+    name = db.Column(db.String(80), nullable=False)
+
+    def __repr__(self):
+        return f'<Capsule {self.name}>'
+
+class CapsuleManager:
+    def __init__(self):
+        self.viewed_capsules = []
+
+    def add_viewed_capsule(self, capsule):
+        self.viewed_capsules.append(capsule)
+
+    def remove_viewed_capsule(self, capsule_id):
+        self.viewed_capsules = [capsule for capsule in self.viewed_capsules if capsule.id != capsule_id]
+
+# Esempio di utilizzo
+capsule1 = Capsule(id=1, name="Capsula 1", user_id=1, content="Contenuto 1", release_date=datetime.utcnow())
+capsule2 = Capsule(id=2, name="Capsula 2", user_id=1, content="Contenuto 2", release_date=datetime.utcnow())
+
+manager = CapsuleManager()
+manager.add_viewed_capsule(capsule1)
+manager.add_viewed_capsule(capsule2)
+
+print("Capsule viste prima della rimozione:", [capsule.name for capsule in manager.viewed_capsules])
+
+manager.remove_viewed_capsule(1)
+
+print("Capsule viste dopo la rimozione:", [capsule.name for capsule in manager.viewed_capsules])
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -86,8 +114,8 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    capsules = Capsule.query.filter_by(user_id=current_user.id).all()
-    return render_template('dashboard.html', capsules=capsules, now=datetime.utcnow())
+    capsules = Capsule.query.all()
+    return render_template('dashboard.html', capsules=capsules)
 
 # Creazione di una nuova capsule
 @app.route('/capsule/new', methods=['GET', 'POST'])
@@ -119,7 +147,7 @@ def new_capsule():
             video_path = os.path.join(app.config['UPLOAD_FOLDER'], video_filename)
             video.save(video_path)
 
-        new_capsule = Capsule(user_id=current_user.id, content=content, release_date=release_date, photo_path=photo_path, video_path=video_path, link=link)
+        new_capsule = Capsule(user_id=current_user.id, content=content, release_date=release_date, photo_path=photo_path, video_path=video_path, link=link, name="New Capsule")
         db.session.add(new_capsule)
         db.session.commit()
         flash("Capsula creata con successo!")
@@ -145,6 +173,18 @@ def view_capsule(capsule_id):
 def view_capsule_by_id(capsule_id):
     capsule = Capsule.query.get_or_404(capsule_id)
     return render_template('view_capsule.html', capsule=capsule)
+
+@app.route('/capsules')
+def get_capsules():
+    capsules = Capsule.query.all()
+    return {'capsules': [capsule.name for capsule in capsules]}
+
+@app.route('/capsules/delete/<int:capsule_id>', methods=['POST'])
+def remove_capsule(capsule_id):
+    capsule = Capsule.query.get_or_404(capsule_id)
+    db.session.delete(capsule)
+    db.session.commit()
+    return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
     with app.app_context():

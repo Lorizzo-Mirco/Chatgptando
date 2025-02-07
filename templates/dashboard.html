@@ -1,16 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Ciao, {{ current_user.username }}!</h2>
-<h3>Le tue capsule del tempo</h3>
-<ul>
-    {% for capsule in capsules %}
-        <li>
-            Capsule creata il: {{ capsule.created_at.strftime('%Y-%m-%d') }} -
-            Rilascio previsto: {{ capsule.release_date.strftime('%Y-%m-%d') }} -
-            <a href="{{ url_for('view_capsule', capsule_id=capsule.id) }}">Visualizza</a>
-        </li>
-    {% else %}
-        <li>Non hai ancora creato capsule.</li>
-    {% endfor %}
-</ul>
+<!DOCTYPE html>
+<html>
+<head><title>Dashboard Capsule</title></head>
+<body>
+    <h1>Dashboard capsule</h1>
+    <h2>Ciao, {{ current_user.username }}!</h2>
+    <h3>Le tue capsule del tempo</h3>
+    <ul>
+        {% for capsule in capsules %}
+            <li>
+                {{ capsule.name }} - Capsule creata il: {{ capsule.created_at.strftime('%Y-%m-%d') }} -
+                Rilascio previsto: {{ capsule.release_date.strftime('%Y-%m-%d') }} -
+                <a href="{{ url_for('view_capsule', capsule_id=capsule.id) }}">Visualizza</a>
+                <form action="{{ url_for('remove_capsule', capsule_id=capsule.id) }}" method="POST" style="display: inline;">
+                    <button type="submit">Elimina</button>
+                </form>
+            </li>
+        {% else %}
+            <li>Non hai ancora creato capsule.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
 {% endblock %}
